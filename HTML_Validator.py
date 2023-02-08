@@ -61,6 +61,6 @@ def _extract_tags(html):
                 i += 1
             if i == len(html):
                 raise ValueError("found < not  matching >")
-            tags.append(html[tag_start:i+1])
+            tags.append(html[tag_start:i + 1])
         i += 1
     return tags
