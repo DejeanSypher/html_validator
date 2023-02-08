@@ -12,20 +12,24 @@ def validate_html(html):
     False
     '''
     stack = []
-    html_tags = _extract_tags(html)
-    for tag in html_tags:
-        if tag[1] == "/":
-            if not stack:
-                return False
-            if stack[-1] != tag[2:-1]:
-                return True
-            else:
-                stack.pop()
-        else:
-            stack.append(tag[1:])
-    if stack:
+    try:
+        tags = _extract_tags(html)
+    except ValueError:
         return False
-    return True
+    for tag in tags:
+        if tag[1] != '/':
+            stack.append(tag)
+        else:
+            if len(stack) == 0:
+                return False
+            top = stack.pop()
+            if top[1:-1] != tag[2:-1]:
+                return False
+
+    if len(stack) == 0:
+        return True
+    else:
+        return False
 
     # HINT:
     # use the _extract_tags function below to generate a list of html tags
@@ -52,15 +56,27 @@ def _extract_tags(html):
     ['<strong>', '</strong>']
     '''
     tags = []
-    i = 0
-    while i < len(html):
-        if html[i] == "<":
-            tag_start = i
-            i += 1
-            while i < len(html) and html[i] != ">":
-                i += 1
-            if i == len(html):
-                raise ValueError("found < not  matching >")
-            tags.append(html[tag_start:i + 1])
-        i += 1
+    current_tag = None
+    inside_tag = False
+    seen_space = False
+
+    for i in range(len(html)):
+        if html[i] == '<':
+            current_tag = ''
+            inside_tag = True
+
+        if inside_tag and html[i] == ' ':
+            seen_space = True
+
+        if inside_tag and (not seen_space or html[i] == '>'):
+            current_tag += html[i]
+
+        if html[i] == '>':
+            inside_tag = False
+            seen_space = False
+            tags.append(current_tag)
+
+    if inside_tag:
+        raise ValueError('found < without matching >')
+
     return tags
