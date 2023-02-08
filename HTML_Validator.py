@@ -56,8 +56,11 @@ def _extract_tags(html):
     while i < len(html):
         if html[i] == "<":
             tag_start = i
-            while html[i] != ">":
+            i += 1
+            while i < len(html) and html[i] != ">":
                 i += 1
+            if i == len(html):
+                raise ValueError("found < not  matching >")
             tags.append(html[tag_start:i+1])
         i += 1
     return tags
